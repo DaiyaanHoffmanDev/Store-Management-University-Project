@@ -1,0 +1,201 @@
+import sqlite3
+from abc import ABC, abstractmethod
+
+@staticmethod
+class PersonManger(ABC):
+    def __init__( name, surname, cell, email):
+        self.name = name
+        self.surname = surname
+        self.cell = cell
+        self.email = email
+
+        @abstractmethod
+        def insert_person():
+            pass
+
+        @abstractmethod
+        def remove_person():
+            pass
+
+        @abstractmethod
+        def display_all():
+            pass
+
+@staticmethod
+class EmployeeManger(PersonManger):
+    def insert_person(name, surname, cell, email):
+        conn = sqlite3.connect('LondonRoots.db')
+        cursor = conn.cursor()
+        cursor.execute("insert into employee (name, surname, cell, email) values (?, ?, ?, ?)", (name, surname, cell, email))
+        conn.commit()
+        conn.close()
+
+@staticmethod
+def remove_person(self, name, surname, cell, email):
+        conn = sqlite3.connect('LondonRoots.db')
+        cursor = conn.cursor()
+        cursor.execute("delete from employee where name = ? and surname = ? and cell = ? and email = ?", (name, surname, cell, email))
+        conn.commit()
+        conn.close()
+
+    def display_all(self):
+        conn = sqlite3.connect('LondonRoots.db')
+        cursor = conn.cursor()
+        select = "select * from employee"
+        cursor.execute(select)
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+        conn.commit()
+        conn.close()
+
+class CustomerManger(PersonManger):
+    def __init__(self, name, surname, cell, email, billing_address):
+        self.name = name
+        self.surname = surname
+        self.cell = cell
+        self.email = email
+        self.billing_address = billing_address
+
+        @abstractmethod
+        def insert_person(self):
+            pass
+
+        @abstractmethod
+        def remove_person(self):
+            pass
+
+        @abstractmethod
+        def display_all(self):
+            pass
+
+class CustomerManger(PersonManger):
+    def insert_person(self, name, surname, cell, email, billing_address):
+        conn = sqlite3.connect('LondonRoots.db')
+        cursor = conn.cursor()
+        cursor.execute("insert into customer (name, surname, cell, email, billing_address) values (?, ?, ?, ?, ?)", (name, surname, cell, email, billing_address))
+        conn.commit()
+        conn.close()
+
+    def remove_person(self, name, surname, cell, email, billing_address):
+        conn = sqlite3.connect('LondonRoots.db')
+        cursor = conn.cursor()
+        cursor.execute("delete from customer where name = ? and surname = ? and cell = ? and email = ? and billing_address = ?", (name, surname, cell, email, billing_address))
+        conn.commit()
+        conn.close()
+
+    def display_all(self):
+        conn = sqlite3.connect('LondonRoots.db')
+        cursor = conn.cursor()
+        select = "select * from customer"
+        cursor.fetchall(select)
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+        conn.commit()
+        conn.close()
+
+class Store:
+    def __init__(self, name, price, quantity):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+
+        conn = sqlite3.connect('LondonRoots.db')
+        cursor = conn.cursor()
+        cursor.execute("insert into store (name, price, quantity) values (?, ?, ?)", (name, price, quantity))
+        conn.commit()
+        conn.close()
+    
+    @staticmethod
+    def sellProduct(product_name):
+        user_input = input("Enter the name of the product you want to sell: ")
+        conn = sqlite3.connect('LondonRoots.db')
+        cursor = conn.cursor()
+        select = "select * from store where name = ?"
+        cursor.execute(select, (user_input,))
+        row = cursor.fetchone()
+        if row:
+            product_quantity = row[3]
+            print(f"product quantity: {product_quantity}")
+            if product_quantity > 0:
+                product_quantity = product_quantity - 1
+                cursor.execute("update store set quantity = ? where name = ?", (product_quantity, user_input))
+                conn.commit()
+                print("Product sold successfully.")
+            else:
+                print("Product is out of stock.")
+                
+                
+        if row is None:
+                    print("product not found")
+                            
+while True:
+    print(f"Welcome to the store management system \n 1 = employees \n 2 = customers \n 3 = store \n 4 = exit")
+    user_input = input("Enter a num from 1 to 4 to make a selection:")
+    
+    if user_input == "1":
+        print("1 = insert employee \n 2 = remove employee \n 3 = display all employees")
+        
+        add_employee = input("enter a number from 1 to 3 to make a selection: ")
+        if add_employee == "1":
+                name = input("Enter the name of the employee: ")
+                surname = input("Enter the surname of the employee: ")
+                cell = input("Enter the cell number of the employee: ")
+                email = input("Enter the email address of the employee: ")
+                EmployeeManger.insert_person(name, surname, cell, email)
+        elif add_employee == "2":
+                name = input("Enter the name of the employee to remove: ")
+                surname = input("Enter the surname of the employee to remove: ")
+                cell = input("Enter the cell number of the employee to remove: ")
+                email = input("Enter the email address of the employee to remove: ")
+                EmployeeManger.remove_person(name, surname, cell, email)
+        elif add_employee == "3":
+                EmployeeManger.display_all()
+        else:
+                print("sorry that is not an option")
+                
+    elif user_input == "2":
+        print("1 = insert customer \n 2 = remove customer \n 3 = display all customers")
+        add_customer = input("enter a number from 1 to 3 to make a selection: ")
+        if add_customer == "1":
+                name = input("Enter the name of the customer: ")
+                surname = input("Enter the surname of the customer: ")
+                cell = input("Enter the cell number of the customer: ")
+                email = input("Enter the email address of the customer: ")
+                billing_address = input("Enter the billing address of the customer: ")
+                CustomerManger.insert_person(name, surname, cell, email, billing_address)
+        elif add_customer == "2":
+                name = input("Enter the name of the customer to remove: ")
+                surname = input("Enter the surname of the customer to remove: ")
+                cell = input("Enter the cell number of the customer to remove: ")
+                email = input("Enter the email address of the customer to remove: ")
+                billing_address = input("Enter the billing address of the customer to remove: ")
+                CustomerManger.remove_person(name, surname, cell, email, billing_address)
+        elif add_customer == "3":
+                CustomerManger.display_all()
+        else:
+                print("sorry taht is not an option")
+
+    elif user_input == "3":
+        print("1 = add product \n 2 = sell product \n 3 = display all products")
+        add_product = input("enter a number from 1 to 3 to make a selection: ")
+        if add_product == "1":
+                name = input("Enter the name of the product: ")
+                price = input("Enter the price of the product: ")
+                quantity = input("Enter the quantity of the product: ")
+                Store(name, price, quantity)
+        elif add_product == "2":
+                Store.sellProduct()
+        elif add_product == "3":
+                Store.display_all()
+        else:
+                print("sorry that is not an option")
+
+    elif user_input == "4":
+        print("goodbye")
+    
+    else:
+        print("sorry that is not an option")    
+
+

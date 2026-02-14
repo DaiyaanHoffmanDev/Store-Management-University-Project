@@ -1,156 +1,164 @@
 import sqlite3
-from abc import ABC, abstractmethod
+from datetime import datetime
 
-class PersonManger(ABC):
-    @abstractmethod
-    def insert_person():
+class personmanger():
+    def insert_person(self, *args):
+        pass
+    def remove_person(self, person_id):
+        pass
+    def display_all(self):
         pass
 
-    @abstractmethod
-    def remove_person():
-        pass
+class employeemanger(personmanger):
+    def insert_person(self, n, s, c, e):
+        db = sqlite3.connect('londonroots.db')
+        cursor = db.cursor()
+        cursor.execute("insert into employee (name, surname, cell, email) values (?, ?, ?, ?)", (n, s, c, e))
+        db.commit()
+        db.close()
 
-    @abstractmethod
-    def display_all():
-        pass
+    def remove_person(self, emp_id):
+        db = sqlite3.connect('londonroots.db')
+        cursor = db.cursor()
+        cursor.execute("delete from employee where employee_id = ?", (emp_id,))
+        db.commit()
+        db.close()
 
-class EmployeeManger(PersonManger):
-    @staticmethod
-    def insert_person(name, surname, cell, email):
-        conn = sqlite3.connect('LondonRoots.db')
-        cursor = conn.cursor()
-        cursor.execute("create table if not exists employee (name TEXT, surname TEXT, cell TEXT, email TEXT)")
-        cursor.execute("insert into employee (name, surname, cell, email) values (?, ?, ?, ?)", (name, surname, cell, email))
-        conn.commit()
-        conn.close()
-
-    @staticmethod
-    def remove_person(name, surname, cell, email):
-        conn = sqlite3.connect('LondonRoots.db')
-        cursor = conn.cursor()
-        cursor.execute("delete from employee where name = ? and surname = ? and cell = ? and email = ?", (name, surname, cell, email))
-        conn.commit()
-        conn.close()
-
-    @staticmethod
-    def display_all():
-        conn = sqlite3.connect('LondonRoots.db')
-        cursor = conn.cursor()
-        cursor.execute("create table if not exists employee (name TEXT, surname TEXT, cell TEXT, email TEXT)")
+    def display_all(self):
+        db = sqlite3.connect('londonroots.db')
+        cursor = db.cursor()
         cursor.execute("select * from employee")
-        rows = cursor.fetchall()
-        for row in rows:
-            print(row)
-        conn.close()
+        for r in cursor.fetchall():
+            print(r)
+        db.close()
 
-class CustomerManger(PersonManger):
-    @staticmethod
-    def insert_person(name, surname, cell, email, billing_address):
-        conn = sqlite3.connect('LondonRoots.db')
-        cursor = conn.cursor()
-        cursor.execute("create table if not exists customer (name TEXT, surname TEXT, cell TEXT, email TEXT, billing_address TEXT)")
-        cursor.execute("insert into customer (name, surname, cell, email, billing_address) values (?, ?, ?, ?, ?)", (name, surname, cell, email, billing_address))
-        conn.commit()
-        conn.close()
+class customermanger(personmanger):
+    def insert_person(self, n, s, c, e, ad):
+        db = sqlite3.connect('londonroots.db')
+        cursor = db.cursor()
+        cursor.execute("insert into customer (name, surname, cell, email, billing_address) values (?, ?, ?, ?, ?)", (n, s, c, e, ad))
+        db.commit()
+        db.close()
 
-    @staticmethod
-    def remove_person(name, surname, cell, email, billing_address):
-        conn = sqlite3.connect('LondonRoots.db')
-        cursor = conn.cursor()
-        cursor.execute("delete from customer where name = ? and surname = ? and cell = ? and email = ? and billing_address = ?", (name, surname, cell, email, billing_address))
-        conn.commit()
-        conn.close()
+    def remove_person(self, cust_id):
+        db = sqlite3.connect('londonroots.db')
+        cursor = db.cursor()
+        cursor.execute("delete from customer where customer_id = ?", (cust_id,))
+        db.commit()
+        db.close()
 
-    @staticmethod
-    def display_all():
-        conn = sqlite3.connect('LondonRoots.db')
-        cursor = conn.cursor()
-        cursor.execute("create table if not exists customer (name TEXT, surname TEXT, cell TEXT, email TEXT, billing_address TEXT)")
+    def display_all(self):
+        db = sqlite3.connect('londonroots.db')
+        cursor = db.cursor()
         cursor.execute("select * from customer")
-        rows = cursor.fetchall()
-        for row in rows:
-            print(row)
-        conn.close()
+        for x in cursor.fetchall():
+            print(x)
+        db.close()
 
 class Store:
-    def __init__(self, name, price, quantity):
-        self.name = name
-        self.price = price
-        self.quantity = quantity
-        conn = sqlite3.connect('LondonRoots.db')
+    @staticmethod
+    def add_product(n, p, q):
+        conn = sqlite3.connect('londonroots.db')
         cursor = conn.cursor()
-        cursor.execute("create table if not exists store (name TEXT, price TEXT, quantity INTEGER)")
-        cursor.execute("insert into store (name, price, quantity) values (?, ?, ?)", (name, price, quantity))
+        cursor.execute("insert into product (name, price, quantity) values (?, ?, ?)", (n, p, q))
         conn.commit()
         conn.close()
-    
+
     @staticmethod
-    def sellProduct():
-        user_input = input("Enter the name of the product you want to sell: ")
-        conn = sqlite3.connect('LondonRoots.db')
+    def remove_product(p_id):
+        conn = sqlite3.connect('londonroots.db')
         cursor = conn.cursor()
-        cursor.execute("create table if not exists store (name TEXT, price TEXT, quantity INTEGER)")
-        cursor.execute("select * from store where name = ?", (user_input,))
-        row = cursor.fetchone()
-        if row:
-            product_quantity = row[2]
-            print(f"product quantity: {product_quantity}")
-            if product_quantity > 0:
-                product_quantity = product_quantity - 1
-                cursor.execute("update store set quantity = ? where name = ?", (product_quantity, user_input))
-                conn.commit()
-                print("Product sold successfully.")
-            else:
-                print("Product is out of stock.")
-        if row is None:
-            print("product not found")
+        cursor.execute("delete from product where product_id = ?", (p_id,))
+        conn.commit()
         conn.close()
 
     @staticmethod
-    def display_all():
-        conn = sqlite3.connect('LondonRoots.db')
+    def update_product(p_id, p, q):
+        conn = sqlite3.connect('londonroots.db')
         cursor = conn.cursor()
-        cursor.execute("create table if not exists store (name TEXT, price TEXT, quantity INTEGER)")
-        cursor.execute("select * from store")
-        rows = cursor.fetchall()
-        for row in rows:
-            print(row)
+        cursor.execute("update product set price = ?, quantity = ? where product_id = ?", (p, q, p_id))
+        conn.commit()
         conn.close()
+
+    @staticmethod
+    def display_products():
+        conn = sqlite3.connect('londonroots.db')
+        cursor = conn.cursor()
+        cursor.execute("select * from product")
+        for p in cursor.fetchall():
+            print(p)
+        conn.close()
+
+    @staticmethod
+    def sell_product(p_id, amount):
+        conn = sqlite3.connect('londonroots.db')
+        cursor = conn.cursor()
+        cursor.execute("select * from product where product_id = ?", (p_id,))
+        row = cursor.fetchone()
+        
+        if row:
+            current_stock = row[3]
+            if current_stock >= amount and amount > 0:
+                new_qty = current_stock - amount
+                total = row[2] * amount
+                date = datetime.now().strftime("%y-%m-%d %h:%m:%s")
+                
+                cursor.execute("update product set quantity = ? where product_id = ?", (new_qty, p_id))
+                cursor.execute("insert into sales (sale_date, product_name, quantity_sold, sale_total) values (?, ?, ?, ?)", 
+                               (date, row[1], amount, total))
+                conn.commit()
+                print(f"success: sold {amount} of {row[1]}. total: r{total}")
+            else:
+                print("error: invalid quantity or insufficient stock.")
+        else:
+            print("error: product id not found.")
+        conn.close()
+
+    @staticmethod
+    def display_sales():
+        conn = sqlite3.connect('londonroots.db')
+        cursor = conn.cursor()
+        cursor.execute("select * from sales")
+        for s in cursor.fetchall():
+            print(s)
+        conn.close()
+
+e_mgr = employeemanger()
+c_mgr = customermanger()
 
 while True:
-    print(f"\nWelcome to the store management system \n 1 = employees \n 2 = customers \n 3 = store \n 4 = exit")
-    user_input = input("Enter a num from 1 to 4 to make a selection:")
-    
-    if user_input == "1":
-        print("1 = insert employee \n 2 = remove employee \n 3 = display all employees")
-        add_employee = input("selection: ")
-        if add_employee == "1":
-            EmployeeManger.insert_person(input("Name: "), input("Surname: "), input("Cell: "), input("Email: "))
-        elif add_employee == "2":
-            EmployeeManger.remove_person(input("Name: "), input("Surname: "), input("Cell: "), input("Email: "))
-        elif add_employee == "3":
-            EmployeeManger.display_all()
-                
-    elif user_input == "2":
-        print("1 = insert customer \n 2 = remove customer \n 3 = display all customers")
-        add_customer = input("selection: ")
-        if add_customer == "1":
-            CustomerManger.insert_person(input("Name: "), input("Surname: "), input("Cell: "), input("Email: "), input("Address: "))
-        elif add_customer == "2":
-            CustomerManger.remove_person(input("Name: "), input("Surname: "), input("Cell: "), input("Email: "), input("Address: "))
-        elif add_customer == "3":
-            CustomerManger.display_all()
+    print("london roots store system")
+    print("1. employees\n2. customers\n3. store/inventory\n4. exit")
+    choice = input("select menu: ")
 
-    elif user_input == "3":
-        print("1 = add product \n 2 = sell product \n 3 = display all products")
-        add_product = input("selection: ")
-        if add_product == "1":
-            Store(input("Name: "), input("Price: "), int(input("Qty: ")))
-        elif add_product == "2":
-            Store.sellProduct()
-        elif add_product == "3":
-            Store.display_all()
+    if choice == "1":
+        print("1. add, 2. remove, 3. display")
+        s = input("select: ")
+        if s == "1": e_mgr.insert_person(input("name: "), input("surname: "), input("cell: "), input("email: "))
+        elif s == "2": e_mgr.remove_person(input("employee id: "))
+        elif s == "3": e_mgr.display_all()
 
-    elif user_input == "4":
-        print("fisnished")
+    elif choice == "2":
+        print("1. add, 2. remove, 3. display")
+        s = input("select: ")
+        if s == "1": c_mgr.insert_person(input("name: "), input("surname: "), input("cell: "), input("email: "), input("address: "))
+        elif s == "2": c_mgr.remove_person(input("customer id: "))
+        elif s == "3": c_mgr.display_all()
+
+    elif choice == "3":
+        print("1. add product, 2. remove, 3. update, 4. display, 5. sell, 6. sales report")
+        s = input("select: ")
+        if s == "1": Store.add_product(input("name: "), float(input("price: ")), int(input("qty: ")))
+        elif s == "2": Store.remove_product(input("product id: "))
+        elif s == "3": Store.update_product(input("id: "), float(input("new price: ")), int(input("new qty: ")))
+        elif s == "4": Store.display_products()
+        elif s == "5": 
+            try:
+                Store.sell_product(input("product id: "), int(input("qty: ")))
+            except:
+                print("error: please enter numbers only.")
+        elif s == "6": Store.display_sales()
+
+    elif choice == "4":
+        print("system closed.")
         break
